@@ -8,6 +8,7 @@
 #             If you store these directories separately on your local machine, create a
 #              directory with symbollic links to the appropriate transcriptomes
 #        $3 : project name
+#        $4 : path to repo/bin
 # output: a concatenated transcriptome consisting of the reference transcriptome +
 #         the most dissimilar sequences from each of the other transcriptomes
 # written by: chase mateusiak, chase.mateusiak@gmail.com, chase.mateusiak@ucsf.edu
@@ -21,11 +22,14 @@
 # Note: .fa must be standard -- pacbio names transcriptome needed to be manipulated to
 #########################################################################################################################
 
+main ~/data/iscap_transcriptomes/raw_transcriptomes/ise6_rna_ncbi_20190808.fa ~/data/iscap_transcriptomes/add_transcriptomes ncbi_ise6_plus_all ~/tick/extract_dissimilar_transcripts/bin
+
 main(){
   # rename cmd line input for clarity
   local reference_transcriptome=$1
   local input_transcriptomes=$2
   local project_name=$3
+  local repo_bin=$4
 
   # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
   local dissimilar_to_ref_set=()
@@ -40,8 +44,8 @@ main(){
   mkdirCd reference_database
   makeBlastDB $reference_transcriptome
   # store path to reference db (/path/to/dir/basename_of_database_files.*)
-  local reference_db_name=$(ls .)
-  local reference_transcriptome_db=$(realpath $reference_db_name)/${reference_db_name}
+  local reference_db_path=$(realpath $(ls .))
+  local reference_transcriptome_db=${reference_db_path}/$(basename $reference_db_path)
 
   # return to project directory
   cd $project_dir
@@ -52,13 +56,13 @@ main(){
 
   # loop through input_transcriptomes, blast transcript against ref, get unique names of transcripts found to be similar to reference,
   # use unique names to extract transcripts without any similarity to reference and create .fa of these
-  for transcriptome in $input_transciptomes/*;
+  for transcriptome in $input_transcriptomes/*;
     do
       # create directory and subdirectories for each input_transcriptome with subdir blast_against_ref, cd into it
       mkdirCd $(basename $transcriptome .fa)
       mkdirCd blast_against_reference
       # extract transcripts without similarities to ref_transcriptome, output as .fa
-      makeDissimilarFasta $reference_transcriptome_db $transcriptome
+      makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
       dissimilar_to_ref_set+=$(realpath $(find . -name '*.fa'))
       # move out of individual input_transcriptome to input_transcriptome dir
@@ -71,31 +75,31 @@ main(){
   # which will be the unique transcripts from the given new_transcriptome to be added to the ref_transcriptome
   # in the final concatenation
 
-  for input_transcriptome_dir in $input_transcriptomes_dir/*;
-    do
-      cd $input_transcriptome_dir
-      # make new directory to hold data related to within_dissimilar set comparison
-      mkdirCd blast_against_dissimilar
-      # current input_transcriptome dissimilar_to_reference .fa
-      local dissimilar_against_reference_transcriptome=$(realpath $(find ../blast_against_reference -name '*.fa'))
-      # input dissimilar .fa in input_transcriptome_dir and array of all dissimilar .fa, create concat .fa of all dissimilar_input_transcriptomes EXCEPT current input_transcriptome
-      mkdirCd concat_minus_fa
-      createDissimilarConcatMinusFasta $dissimilar_against_reference_transcriptome $dissimilar_to_ref_set
-      cd ..
-      # make blast database from concatMinus .fa
-      makeBlastDB $(find ./concat_minus_fa -name '*.fa')
-      # store path to concatMinus database
-      local databaseMinus_name=$(find . -name '*_db')
-      local databaseMinus=$(realpath $database_name/${database_name})
-      # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
-      makeDissimilarFasta $databaseMinus $dissimilar_against_reference_transcriptome
-      # add this .fa to array which stores final .fa to concat to reference_transcriptome
-      transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
-      cd $input_transcriptomes_dir
-    done
-
-  cd $project_dir
-  createFinalConcat $ref_transcriptome $transcripts_t_concat
+  # for input_transcriptome_dir in $input_transcriptomes_dir/*;
+  #   do
+  #     cd $input_transcriptome_dir
+  #     # make new directory to hold data related to within_dissimilar set comparison
+  #     mkdirCd blast_against_dissimilar
+  #     # current input_transcriptome dissimilar_to_reference .fa
+  #     local dissimilar_against_reference_transcriptome=$(realpath $(find ../blast_against_reference -name '*.fa'))
+  #     # input dissimilar .fa in input_transcriptome_dir and array of all dissimilar .fa, create concat .fa of all dissimilar_input_transcriptomes EXCEPT current input_transcriptome
+  #     mkdirCd concat_minus_fa
+  #     createDissimilarConcatMinusFasta $dissimilar_agaidissimilar_against_reference_transcriptomenst_reference_transcriptome $dissimilar_to_ref_set
+  #     cd ..
+  #     # make blast database from concatMinus .fa
+  #     makeBlastDB $(find ./concat_minus_fa -name '*.fa')
+  #     # store path to concatMinus database
+  #     local databaseMinus_name=$(find . -name '*_db')
+  #     local databaseMinus=$(realpath $database_name/${database_name})
+  #     # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
+  #     makeDissimilarFasta $databaseMinus $dissimilar_against_reference_transcriptome $repo_bin
+  #     # add this .fa to array which stores final .fa to concat to reference_transcriptome
+  #     transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
+  #     cd $input_transcriptomes_dir
+  #   done
+  #
+  # cd $project_dir
+  # createFinalConcat $ref_transcriptome $transcripts_t_concat
 } # end main()
 
 mkdirCd(){
@@ -108,35 +112,50 @@ makeBlastDB (){
   module load blast+
 
   local fasta=$1
-  local db_name=$(basename $fa_to_db .fa)_db
+  local name=$(basename $fasta .fa)
+  local db_name=${name}_db
   mkdirCd ${db_name}
   makeblastdb -parse_seqids -dbtype nucl -in $fasta -out $db_name
   cd ..
 } # end makeBlastDB
 
-makeDissimilarFa(){
+makeDissimilarFasta(){
   module load Sali
   module load blast+
+  module load anaconda
+
+  local CONDA_BASE=$(conda info --base)
+  source ${CONDA_BASE}/etc/profile.d/conda.sh
+  # activate tae1 in atanas' wynton acct b/c it is the Bio modules
+  conda activate tae1
 
   local db=$1
   local query_fasta=$2
   local query_fasta_bn=$(basename $2 .fa)
   local output_tsv=${query_fasta_bn}.tsv
-  local output_pairwise=$(basename $output_tsv .tsv).pairwise
+  local output_noext=$(basename $output_tsv .tsv)
+  local output_pairwise=${output_noext}.pairwise
+  local bin=$3
 
+  echo 'creating blast .tsv and .pairwise'
   # blast query_fasta against db -- output both .tsv and pairwise comparisons
   blastn -outfmt 6 -num_threads 8 -db $db -query $query_fasta -out $output_tsv
   blastn -outfmt 0 -num_threads 8 -db $db -query $query_fasta -out $output_pairwise
 
+  echo 'getting unique transcript names from .tsv'
   #extract unique names from output of above
-  awk -v FS='\t' '{print $1}' $output_tsv | uniq > $(basename output_tsv .tsv)_unique.tsv
+  awk -v FS='\t' '{print $1}' $output_tsv | uniq > ${output_noext}_unique.tsv
 
+  echo 'creating .fa'
   # create .fa of transcripts from $query_fasta not found to have any similarity to transcripts in $db
   if [[ $query_fasta_bn == p* ]]; then
-    create_fa_blast_unmatched.py $query_fasta $(basename output_tsv .tsv)_unique.tsv
+    #python3 /wynton/home/choulab/atanasdradkov/tick/extract_dissimilar_transcripts/bin/create_fa_blast_unmatched_pacbio.py $query_fasta ${output_noext}_unique.tsv
+    python3 ${bin}/create_fa_blast_unmatched_pacbio.py $query_fasta ${output_noext}_unique.tsv
   else
-    create_fa_blast_unmatched.py $query_fasta $(basename output_tsv .tsv)_unique.tsv
+    #python3 /wynton/home/choulab/atanasdradkov/tick/extract_dissimilar_transcripts/bin/create_fa_blast_unmatched.py $query_fasta ${output_noext}_unique.tsv
+    python3 ${bin}/create_fa_blast_unmatched.py $query_fasta {$(basename $output_noext .tsv)}_unique.tsv
   fi
+  conda deactivate
 } # end makeDissimilarFa()
 
 createDissimilarConcatMinusFasta(){
