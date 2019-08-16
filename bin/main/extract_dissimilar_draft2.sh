@@ -66,7 +66,8 @@ main(){
       # extract transcripts without similarities to ref_transcriptome, output as .fa
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
-      dissimilar_to_ref_set+=( $(realpath $(find . -name "*.fa")) )
+      dissimilar_fa=$(realpath $(find . -name "*.fa"))
+      dissimilar_to_ref_set+=($dissimilar_fa)
       # move out of individual input_transcriptome to input_transcriptome dir
       cd $input_transcriptomes_dir
     done
@@ -170,12 +171,13 @@ makeDissimilarFasta(){
 
 createDissimilarConcatMinusFasta(){
   local current_fasta=$1
+  local current_fasta_bn=$(basename $1 .fa)
   local dissim_set=$2
 
-  local concat_minus=concat_minus_$(basename $current_fasta .fa).fa
+  local concat_minus=concat_minus_${current_fasta_bn}.fa
   touch $concat_minus
 
-  for fasta in "${dissim_set[@]}";
+  for fasta in ${dissim_set[@]};
    do
      printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n"
     if [[ $fasta != $current_fasta  ]]; then
