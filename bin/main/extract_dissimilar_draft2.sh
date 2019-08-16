@@ -71,7 +71,7 @@ main(){
       cd $input_transcriptomes_dir
     done
 
-    printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[0]} and ${dissimilar_to_ref_set[1]}\n\n\n\n"
+    printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n\n\n\n"
     printf "\n"
 
   # loop through each new_transcriptome dir, create concat_transcriptome minus the
@@ -100,7 +100,7 @@ main(){
       # store path to concatMinus database
       local databaseMinus=$(realpath $(find . -name "*_db"))
       local databaseMinus_name=$(basename $databaseMinus)
-      local databaseMinus_path=${databaseMinus}/${database_name}
+      local databaseMinus_path=${databaseMinus}/${databaseMinus_name}
       # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
       printf "\npath to database is $databaseMinus_path\n"
       makeDissimilarFasta $databaseMinus_path $dissimilar_against_reference_fasta $repo_bin
@@ -108,9 +108,8 @@ main(){
       transcripts_to_concat+=($(realpath $(find . -name "*.fa")))
       cd $input_transcriptomes_dir
     done
-  printf "\ncreate final concat transcriptome\n"
   cd $project_dir
-  createFinalConcat $ref_transcriptome $transcripts_t_concat
+  createFinalConcat $ref_transcriptome $transcripts_to_concat
 } # end main()
 
 mkdirCd(){
@@ -186,6 +185,8 @@ createDissimilarConcatMinusFasta(){
 } # end createDissimilarConcatMinusFasta()
 
 createFinalConcat(){
+  printf "\ncreate final concat transcriptome\n"
+
   local fa_to_concat=$1
   local ref=$2
 
@@ -194,6 +195,7 @@ createFinalConcat(){
 
   for fasta in $fa_to_concat;
    do
+     printf "is this just going forever? why isn't it stopping?"
      cat $fasta >> dissimiliar_transcripts.fa
    done
    cat $2 >> concat_ref_dissimilar.fa
