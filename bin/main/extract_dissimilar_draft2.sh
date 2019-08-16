@@ -88,6 +88,7 @@ main(){
       createDissimilarConcatMinusFasta $dissimilar_against_reference_fasta $dissimilar_to_ref_set
       cd ..
       # make blast database from concatMinus .fa
+      echo 'path to the disismilar_db is $(realpath $(find ./concat_minus_fa -name '*.fa'))'
       makeBlastDB $(realpath $(find ./concat_minus_fa -name '*.fa'))
       # store path to concatMinus database
       local databaseMinus=$(realpath $(find . -name '*_db'))
@@ -169,6 +170,9 @@ createDissimilarConcatMinusFasta(){
 
   for fasta in "${dissim_set[@]}";
    do
+     echo 'createDissimilarConcatMinus Step!!!'
+     echo $fasta
+     echo $current_fasta
     if [[ $fasta != $current_fasta  ]]; then
       cat $fasta >> $concat_minus
     fi
