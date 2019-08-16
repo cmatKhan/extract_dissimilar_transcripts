@@ -50,7 +50,7 @@ unmatched_records = removeRowsInList(fa_df, 'id',uniq_blast_res)
 
 # combine id, desc columns to form 'name' column
 
-unmatched_records['name'] = unmatched_records.id.str.cat(unmatched_records.desc, sep=' ')
+unmatched_records.loc[: 'name'] = unmatched_records.id.str.cat(unmatched_records.desc, sep=' ')
 
 cols = ['name', 'seq']
 

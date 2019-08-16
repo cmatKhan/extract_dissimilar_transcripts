@@ -75,31 +75,31 @@ main(){
   # which will be the unique transcripts from the given new_transcriptome to be added to the ref_transcriptome
   # in the final concatenation
 
-  # for input_transcriptome_dir in $input_transcriptomes_dir/*;
-  #   do
-  #     cd $input_transcriptome_dir
-  #     # make new directory to hold data related to within_dissimilar set comparison
-  #     mkdirCd blast_against_dissimilar
-  #     # current input_transcriptome dissimilar_to_reference .fa
-  #     local dissimilar_against_reference_transcriptome=$(realpath $(find ../blast_against_reference -name '*.fa'))
-  #     # input dissimilar .fa in input_transcriptome_dir and array of all dissimilar .fa, create concat .fa of all dissimilar_input_transcriptomes EXCEPT current input_transcriptome
-  #     mkdirCd concat_minus_fa
-  #     createDissimilarConcatMinusFasta $dissimilar_agaidissimilar_against_reference_transcriptomenst_reference_transcriptome $dissimilar_to_ref_set
-  #     cd ..
-  #     # make blast database from concatMinus .fa
-  #     makeBlastDB $(find ./concat_minus_fa -name '*.fa')
-  #     # store path to concatMinus database
-  #     local databaseMinus_name=$(find . -name '*_db')
-  #     local databaseMinus=$(realpath $database_name/${database_name})
-  #     # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
-  #     makeDissimilarFasta $databaseMinus $dissimilar_against_reference_transcriptome $repo_bin
-  #     # add this .fa to array which stores final .fa to concat to reference_transcriptome
-  #     transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
-  #     cd $input_transcriptomes_dir
-  #   done
-  #
-  # cd $project_dir
-  # createFinalConcat $ref_transcriptome $transcripts_t_concat
+  for input_transcriptome_dir in $input_transcriptomes_dir/*;
+    do
+      cd $input_transcriptome_dir
+      # make new directory to hold data related to within_dissimilar set comparison
+      mkdirCd blast_against_dissimilar
+      # current input_transcriptome dissimilar_to_reference .fa
+      local dissimilar_against_reference_transcriptome=$(realpath $(find ../blast_against_reference -name '*.fa'))
+      # input dissimilar .fa in input_transcriptome_dir and array of all dissimilar .fa, create concat .fa of all dissimilar_input_transcriptomes EXCEPT current input_transcriptome
+      mkdirCd concat_minus_fa
+      createDissimilarConcatMinusFasta $dissimilar_agaidissimilar_against_reference_transcriptomenst_reference_transcriptome $dissimilar_to_ref_set
+      cd ..
+      # make blast database from concatMinus .fa
+      makeBlastDB $(find ./concat_minus_fa -name '*.fa')
+      # store path to concatMinus database
+      local databaseMinus_name=$(find . -name '*_db')
+      local databaseMinus=$(realpath $database_name/${database_name})
+      # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
+      makeDissimilarFasta $databaseMinus $dissimilar_against_reference_transcriptome $repo_bin
+      # add this .fa to array which stores final .fa to concat to reference_transcriptome
+      transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
+      cd $input_transcriptomes_dir
+    done
+
+  cd $project_dir
+  createFinalConcat $ref_transcriptome $transcripts_t_concat
 } # end main()
 
 mkdirCd(){
