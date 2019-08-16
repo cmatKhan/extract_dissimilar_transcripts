@@ -64,7 +64,7 @@ main(){
       # extract transcripts without similarities to ref_transcriptome, output as .fa
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
-      dissimilar_to_ref_set+=$(realpath $(find . -name '*.fa'))
+      dissimilar_to_ref_set+=($(realpath $(find . -name '*.fa')))
       # move out of individual input_transcriptome to input_transcriptome dir
       cd $input_transcriptomes_dir
     done
@@ -88,7 +88,7 @@ main(){
       createDissimilarConcatMinusFasta $dissimilar_against_reference_fasta $dissimilar_to_ref_set
       cd ..
       # make blast database from concatMinus .fa
-      makeBlastDB $(find ./concat_minus_fa -name '*.fa')
+      makeBlastDB $(realpath $(find ./concat_minus_fa -name '*.fa'))
       # store path to concatMinus database
       local databaseMinus=$(realpath $(find . -name '*_db'))
       local databaseMinus_name=$(basename $databaseMinus)
@@ -96,7 +96,7 @@ main(){
       # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
       makeDissimilarFasta $databaseMinus_path $dissimilar_against_reference_fasta $repo_bin
       # add this .fa to array which stores final .fa to concat to reference_transcriptome
-      transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
+      transcripts_to_concat+=($(realpath $(find . -name '*.fa')))
       cd $input_transcriptomes_dir
     done
 
@@ -167,7 +167,7 @@ createDissimilarConcatMinusFasta(){
   local concat_minus=concat_minus_$(basename $current_fasta .fa).fa
   touch $concat_minus
 
-  for fasta in "${dissim_set[@]}";
+  for fasta in ${dissim_set[@]};
    do
     if [[ $fasta != $current_fasta  ]]; then
       cat $fasta >> $concat_minus
