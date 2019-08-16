@@ -42,6 +42,7 @@ main(){
 
   # make database from reference_transcriptome
   mkdirCd reference_database
+  printf "\ncreate blast database from reference transcriptome\n\n"
   makeBlastDB $reference_transcriptome
   # store path to reference db (/path/to/dir/basename_of_database_files.*)
   local reference_db_path=$(realpath $(ls .))
@@ -58,9 +59,11 @@ main(){
   # use unique names to extract transcripts without any similarity to reference and create .fa of these
   for transcriptome in $input_transcriptomes/*;
     do
+      printf "\nbegin processing $transcriptome against reference transcriptome database\n\n"
       # create directory and subdirectories for each input_transcriptome with subdir blast_against_ref, cd into it
       mkdirCd $(basename $transcriptome .fa)
       mkdirCd blast_against_reference
+      printf "\nextract transcripts dissimilar to reference transcriptome as .fa\n\n"
       # extract transcripts without similarities to ref_transcriptome, output as .fa
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
@@ -68,6 +71,8 @@ main(){
       # move out of individual input_transcriptome to input_transcriptome dir
       cd $input_transcriptomes_dir
     done
+
+    printf "\n the set of fastas dissimilar to the reference transcriptome are $dissimilar_to_ref_set[@]\n\n"
 
   # loop through each new_transcriptome dir, create concat_transcriptome minus the
   # individual new transcriptome, create new blast database from this concatMinus db
@@ -77,6 +82,7 @@ main(){
 
   for input_transcriptome_dir in $input_transcriptomes_dir/*;
     do
+      printf "\n being processing $input_transcriptome_dir to extract .fa of transcripts dissimilar to other transcripts dissimilar to reference transcriptome\n\n"
       cd $input_transcriptome_dir
       # make new directory to hold data related to within_dissimilar set comparison
       mkdirCd blast_against_dissimilar
@@ -89,7 +95,7 @@ main(){
       createDissimilarConcatMinusFasta $dissimilar_against_reference_fasta $dissimilar_to_ref_set
       cd ..
       # make blast database from concatMinus .fa
-      printf "\ninput to makeBlastDB\n\n"
+      printf "\ninput to makeBlastDB $(realpath $(find ./concat_minus_fa -name "*.fa"))\n\n"
       makeBlastDB $(realpath $(find ./concat_minus_fa -name "*.fa"))
       # store path to concatMinus database
       local databaseMinus=$(realpath $(find . -name "*_db"))
@@ -102,7 +108,7 @@ main(){
       transcripts_to_concat+=($(realpath $(find . -name "*.fa")))
       cd $input_transcriptomes_dir
     done
-
+  printf "\n create final concat transcriptome\n\n"
   cd $project_dir
   createFinalConcat $ref_transcriptome $transcripts_t_concat
 } # end main()
@@ -142,16 +148,16 @@ makeDissimilarFasta(){
   local output_pairwise=${output_noext}.pairwise
   local bin=$3
 
-  echo 'creating blast .tsv and .pairwise'
+  printf "\ncreating blast .tsv and .pairwise of $query_fasta\n\n"
   # blast query_fasta against db -- output both .tsv and pairwise comparisons
   blastn -outfmt 6 -num_threads 8 -db $db -query $query_fasta -out $output_tsv
   blastn -outfmt 0 -num_threads 8 -db $db -query $query_fasta -out $output_pairwise
 
-  echo 'getting unique transcript names from .tsv'
+  printf "\nextract unique transcript names of sequences with similarities to db from $output_noext\n\n"
   #extract unique names from output of above
   awk -v FS='\t' '{print $1}' $output_tsv | uniq > ${output_noext}_unique.tsv
 
-  echo 'creating .fa'
+  printf "\ncreate $2 .fa of sequences without significant matches in db\n\n"
   # create .fa of transcripts from $query_fasta not found to have any similarity to transcripts in $db
   if [[ $query_fasta_bn == p* ]]; then
     #python3 /wynton/home/choulab/atanasdradkov/tick/extract_dissimilar_transcripts/bin/create_fa_blast_unmatched_pacbio.py $query_fasta ${output_noext}_unique.tsv
@@ -172,7 +178,7 @@ createDissimilarConcatMinusFasta(){
 
   for fasta in "${dissim_set[@]}";
    do
-     echo 'createDissimilarConcatMinus Step!!!'
+     printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n\n"
      echo $fasta
      echo $current_fasta
     if [[ $fasta != $current_fasta  ]]; then
