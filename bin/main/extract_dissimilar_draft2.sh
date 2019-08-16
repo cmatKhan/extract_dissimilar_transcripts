@@ -169,7 +169,7 @@ createDissimilarConcatMinusFasta(){
   for fasta in "${dissim_set[@]}";
    do
     if [[ $fasta != $current_fasta  ]]; then
-      echo $fasta >> $concat_minus
+      cat $fasta >> $concat_minus
     fi
    done
 } # end createDissimilarConcatMinusFasta()
@@ -183,7 +183,7 @@ createFinalConcat(){
 
   for fasta in $fa_to_concat;
    do
-     echo $fasta >> dissimiliar_transcripts.fa
+     cat $fasta >> dissimiliar_transcripts.fa
    done
    cat $2 >> concat_ref_dissimilar.fa
    cat dissimiliar_transcripts.fa >> concat_ref_dissimilar.fa
