@@ -7,8 +7,7 @@ output: .fa of unmatched tx
 written by: chase mateusiak, chase.mateusiak@gmail.com, chase.mateusiak@ucsf.edu
 credit:
 date: 20190813
-
-Note: 
+Note:
 """
 from Bio import SeqIO
 import pandas as pd

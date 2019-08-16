@@ -7,8 +7,7 @@ output: .fa of unmatched tx
 written by: chase mateusiak, chase.mateusiak@gmail.com, chase.mateusiak@ucsf.edu
 credit:
 date: 20190813
-
-Note: 
+Note:
 """
 from Bio import SeqIO
 import pandas as pd
@@ -51,7 +50,7 @@ unmatched_records = removeRowsInList(fa_df, 'id',uniq_blast_res)
 
 # combine id, desc columns to form 'name' column
 
-unmatched_records['name'] = unmatched_records.id.str.cat(unmatched_records.desc)
+unmatched_records['name'] = unmatched_records.id.str.cat(unmatched_records.desc, sep=' ')
 
 cols = ['name', 'seq']
 
