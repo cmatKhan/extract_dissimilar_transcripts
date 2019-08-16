@@ -31,14 +31,16 @@ main(){
   local project_name=$3
   local repo_bin=$4
 
-  # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
-  dissimilar_to_ref_set=()
   # initialize array to hold final subset of dissimilar transcripts from each input_transcriptome that are both dissimilar to the reference_transcriptome as well as one another
-  transcripts_to_concat=()
+  local transcripts_to_concat=()
 
   # create project directory at current location, cd, store path
   mkdirCd extract_dissimilar_${project_name}
   local project_dir=$(pwd)
+  mkdir logs
+  local logs_dir=${project_dir}/logs
+  # create .txt to store list of dissimilar_to_ref_set .fa paths
+  touch ${logs_dir}/dissimilar_to_ref_set.txt
 
   # make database from reference_transcriptome
   mkdirCd reference_database
@@ -67,10 +69,13 @@ main(){
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
       dissimilar_fa=$(realpath $(find . -name "*.fa"))
-      dissimilar_to_ref_set+=($dissimilar_fa)
+      cat $dissimilar_fa >> ${project_dir}/logs/dissimilar_to_ref_set.txt
       # move out of individual input_transcriptome to input_transcriptome dir
       cd $input_transcriptomes_dir
     done
+
+    # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
+    local dissimilar_to_ref_set=$(cat ${project_dir}/logs/dissimilar_to_ref_set.txt)
 
     printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n\n\n\n"
     printf "\n"
@@ -111,6 +116,7 @@ main(){
     done
   cd $project_dir
   createFinalConcat $ref_transcriptome $transcripts_to_concat
+  exit 0
 } # end main()
 
 mkdirCd(){
