@@ -167,7 +167,7 @@ createDissimilarConcatMinusFasta(){
   local concat_minus=concat_minus_$(basename $current_fasta .fa).fa
   touch $concat_minus
 
-  for fasta in ${dissim_set[@]};
+  for fasta in "${dissim_set[@]}";
    do
     if [[ $fasta != $current_fasta  ]]; then
       cat $fasta >> $concat_minus
