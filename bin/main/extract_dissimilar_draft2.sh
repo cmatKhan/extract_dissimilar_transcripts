@@ -69,7 +69,7 @@ main(){
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
       dissimilar_fa=$(realpath $(find . -name "*.fa"))
-      cat $dissimilar_fa >> ${project_dir}/logs/dissimilar_to_ref_set.txt
+      echo $dissimilar_fa >> ${project_dir}/logs/dissimilar_to_ref_set.txt
       # move out of individual input_transcriptome to input_transcriptome dir
       cd $input_transcriptomes_dir
     done
