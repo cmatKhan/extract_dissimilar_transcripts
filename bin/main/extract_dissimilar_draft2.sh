@@ -22,7 +22,7 @@
 # Note: .fa must be standard -- pacbio names transcriptome needed to be manipulated to
 #########################################################################################################################
 
-main ~/data/iscap_transcriptomes/raw_transcriptomes/ise6_rna_ncbi_20190808.fa ~/data/iscap_transcriptomes/add_transcriptomes ncbi_ise6_plus_all ~/tick/extract_dissimilar_transcripts/bin
+# main ~/data/iscap_transcriptomes/raw_transcriptomes/ise6_rna_ncbi_20190808.fa ~/data/iscap_transcriptomes/add_transcriptomes ncbi_ise6_plus_all ~/tick/extract_dissimilar_transcripts/bin
 
 main(){
   # rename cmd line input for clarity
@@ -153,7 +153,7 @@ makeDissimilarFasta(){
     python3 ${bin}/create_fa_blast_unmatched_pacbio.py $query_fasta ${output_noext}_unique.tsv
   else
     #python3 /wynton/home/choulab/atanasdradkov/tick/extract_dissimilar_transcripts/bin/create_fa_blast_unmatched.py $query_fasta ${output_noext}_unique.tsv
-    python3 ${bin}/create_fa_blast_unmatched.py $query_fasta {$(basename $output_noext .tsv)}_unique.tsv
+    python3 ${bin}/create_fa_blast_unmatched.py $query_fasta ${output_noext}_unique.tsv
   fi
   conda deactivate
 } # end makeDissimilarFa()
