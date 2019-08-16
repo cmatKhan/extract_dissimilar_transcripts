@@ -170,9 +170,10 @@ makeDissimilarFasta(){
 
 createDissimilarConcatMinusFasta(){
   local current_fasta=$1
+  local current_fasta_bn=$(basename $1 .fa)
   local dissim_set=$2
 
-  local concat_minus=concat_minus_$(basename $current_fasta .fa).fa
+  local concat_minus=concat_minus_${current_fasta_bn}.fa
   touch $concat_minus
 
   for fasta in "${dissim_set[@]}";
