@@ -33,11 +33,11 @@ main(){
   local transcripts_to_concat=()
 
   # create project directory at current location, cd, store path
-  makeDirChangeDir extract_dissimilar_${project_name}
+  mkdirCd extract_dissimilar_${project_name}
   local project_dir=$(pwd)
 
   # make database from reference_transcriptome
-  makeDirChangeDir reference_database
+  mkdirCd reference_database
   makeBlastDB $reference_transcriptome
   # store path to reference db (/path/to/dir/basename_of_database_files.*)
   local reference_db_name=$(ls .)
