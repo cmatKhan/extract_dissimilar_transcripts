@@ -32,9 +32,9 @@ main(){
   local repo_bin=$4
 
   # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
-  local dissimilar_to_ref_set=()
+  dissimilar_to_ref_set=()
   # initialize array to hold final subset of dissimilar transcripts from each input_transcriptome that are both dissimilar to the reference_transcriptome as well as one another
-  local transcripts_to_concat=()
+  transcripts_to_concat=()
 
   # create project directory at current location, cd, store path
   mkdirCd extract_dissimilar_${project_name}
@@ -72,6 +72,7 @@ main(){
     done
 
     printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n\n\n\n"
+    printf "\n"
 
   # loop through each new_transcriptome dir, create concat_transcriptome minus the
   # individual new transcriptome, create new blast database from this concatMinus db
