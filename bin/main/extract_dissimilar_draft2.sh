@@ -71,7 +71,7 @@ main(){
   # which will be the unique transcripts from the given new_transcriptome to be added to the ref_transcriptome
   # in the final concatenation
 
-  for input_transcriptome_dir in $input_transcriptomes_dir/*);
+  for input_transcriptome_dir in $input_transcriptomes_dir/*;
     do
       cd $input_transcriptome_dir
       # make new directory to hold data related to within_dissimilar set comparison
