@@ -12,7 +12,10 @@
 # written by: chase mateusiak, chase.mateusiak@gmail.com, chase.mateusiak@ucsf.edu
 # date: 20190814, edit 20190815
 #
-# Dependencies: blast+ > ___v, pandas etc from .py scripts(s), python3
+# Dependencies: blast+ > ___v, pandas etc from .py scripts(s), python3;
+#               PLEASE NOTE: this is intended to be run from wynton qb3-dev3 (or any of the other dev nodes, but this one has the most resources)
+#                            This will also work on your local machine if you have blast+ installed and blastn and makeblastdb are in your path.
+#                            However, you must remove the module load lines from the makeBlastDB and makeDissimilarFasta methods
 #
 # Note: .fa must be standard -- pacbio names transcriptome needed to be manipulated to
 #########################################################################################################################
@@ -23,12 +26,13 @@ main(){
   local input_transcriptomes=$2
   local project_name=$3
 
-  # initialize array to hold transcript .fa to add to reference_transcriptome at end of process
+  # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
   local dissimilar_set=()
+  # initialize array to hold final subset of dissimilar transcripts from each input_transcriptome that are both dissimilar to the reference_transcriptome as well as one another
   local transcripts_to_concat=()
 
   # create project directory at current location, cd, store path
-  makeDirChangeDir extract_dissimilar_${proj_name}
+  makeDirChangeDir extract_dissimilar_${project_name}
   local project_dir=$(pwd)
 
   # make database from reference_transcriptome
@@ -41,7 +45,7 @@ main(){
   # return to project directory
   cd $project_dir
 
-  # create dir new_transcriptomes which will hold data for each input_transcriptome, cd, store path
+  # create dir input_transcriptomes which will hold data for each input_transcriptome, cd, store path
   mkdirCd input_transcriptomes
   local input_transcriptomes_dir=$(pwd)
 
@@ -78,14 +82,14 @@ main(){
       createDissimilarConcatMinusFasta $dissimilar_against_reference_transcriptome $dissimilar_set
       cd ..
       # make blast database from concatMinus .fa
-      makeBlastDB $(find ./concat_minus -name '*.fa')
+      makeBlastDB $(find ./concat_minus_fa -name '*.fa')
       # store path to concatMinus database
       local databaseMinus_name=$(find . -name '*_db')
-      local databaseMinus_path=$(realpath $database_name/${database_name})
+      local databaseMinus=$(realpath $database_name/${database_name})
       # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
-      makeDissimilarFasta $databaseMinus_path $dissimilar_against_reference_transcriptome
+      makeDissimilarFasta $databaseMinus $dissimilar_against_reference_transcriptome
       # add this .fa to array which stores final .fa to concat to reference_transcriptome
-      transcripts_to_concat+=$(realpath new dissimilar .fa)
+      transcripts_to_concat+=$(realpath $(find . -name '*.fa'))
       cd $input_transcriptomes_dir
     done
 
@@ -99,6 +103,9 @@ mkdirCd(){
 } # end mkdirCd
 
 makeBlastDB (){
+  module load Sali
+  module load blast+
+
   local fasta=$1
   local db_name=$(basename $fa_to_db .fa)
   mkdirCd $db_name
@@ -107,14 +114,18 @@ makeBlastDB (){
 } # end makeBlastDB
 
 makeDissimilarFa(){
+  module load Sali
+  module load blast+
 
   local db=$1
   local query_fasta=$2
   local query_fasta_bn=$(basename $2 .fa)
   local output_tsv=${query_fasta_bn}.tsv
+  local output_pairwise=$(basename $output_tsv .tsv).pairwise
 
-  # blast query_fasta against db
+  # blast query_fasta against db -- output both .tsv and pairwise comparisons
   blastn -outfmt 6 -num_threads 8 -db $db -query $query_fasta -out $output_tsv
+  blastn -outfmt 0 -num_threads 8 -db $db -query $query_fasta -out $output_pairwise
 
   #extract unique names from output of above
   awk -v FS='\t' '{print $1}' $output_tsv | uniq > $(basename output_tsv .tsv)_unique.tsv
