@@ -42,7 +42,7 @@ main(){
 
   # make database from reference_transcriptome
   mkdirCd reference_database
-  printf "\ncreate blast database from reference transcriptome\n"
+  printf "\ncreate blast database from reference transcriptome"
   makeBlastDB $reference_transcriptome
   # store path to reference db (/path/to/dir/basename_of_database_files.*)
   local reference_db_path=$(realpath $(ls .))
@@ -63,7 +63,6 @@ main(){
       # create directory and subdirectories for each input_transcriptome with subdir blast_against_ref, cd into it
       mkdirCd $(basename $transcriptome .fa)
       mkdirCd blast_against_reference
-      printf "\nextract transcripts dissimilar to reference transcriptome as .fa\n"
       # extract transcripts without similarities to ref_transcriptome, output as .fa
       makeDissimilarFasta $reference_transcriptome_db $transcriptome $repo_bin
       # add .fa to dissimilar_to_ref_set
@@ -72,7 +71,7 @@ main(){
       cd $input_transcriptomes_dir
     done
 
-    printf "\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n"
+    printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n\n\n\n"
 
   # loop through each new_transcriptome dir, create concat_transcriptome minus the
   # individual new transcriptome, create new blast database from this concatMinus db
@@ -148,7 +147,7 @@ makeDissimilarFasta(){
   local output_pairwise=${output_noext}.pairwise
   local bin=$3
 
-  printf "\ncreating blast .tsv and .pairwise of $query_fasta\n"
+  printf "\nblast $query_fasta_bn , create .tsv and .pairwise\n"
   # blast query_fasta against db -- output both .tsv and pairwise comparisons
   blastn -outfmt 6 -num_threads 8 -db $db -query $query_fasta -out $output_tsv
   blastn -outfmt 0 -num_threads 8 -db $db -query $query_fasta -out $output_pairwise
