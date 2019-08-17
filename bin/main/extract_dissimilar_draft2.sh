@@ -109,9 +109,6 @@ main(){
           cat $fa >> $concat_minus
         fi
        done
-     done
-
-
       cd ..
       # make blast database from concatMinus .fa
       printf "\ninput to makeBlastDB $(realpath $(find ./concat_minus_fa -name "*.fa"))\n"
@@ -192,21 +189,21 @@ makeDissimilarFasta(){
   conda deactivate
 } # end makeDissimilarFa()
 
-createDissimilarConcatMinusFasta(){
-  local current_fasta=$1
-  local current_fasta_bn=$(basename $1 .fa)
-  local dissim_set=$(echo $2)
-
-  local concat_minus=concat_minus_${current_fasta_bn}.fa
-  for fa in $dissim_set;
-   do
-    printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n"
-    if [[ $fa != $current_fasta ]]; then
-      printf "\nconcat $fasta to $concat_minus\n"
-      cat $fa >> $concat_minus
-    fi
-   done
-} # end createDissimilarConcatMinusFasta()
+# createDissimilarConcatMinusFasta(){
+#   local current_fasta=$1
+#   local current_fasta_bn=$(basename $1 .fa)
+#   local dissim_set=$(echo $2)
+#
+#   local concat_minus=concat_minus_${current_fasta_bn}.fa
+#   for fa in $dissim_set;
+#    do
+#     printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n"
+#     if [[ $fa != $current_fasta ]]; then
+#       printf "\nconcat $fasta to $concat_minus\n"
+#       cat $fa >> $concat_minus
+#     fi
+#    done
+# } # end createDissimilarConcatMinusFasta()
 
 createFinalConcat(){
   printf "\ncreate final concat transcriptome\n"
