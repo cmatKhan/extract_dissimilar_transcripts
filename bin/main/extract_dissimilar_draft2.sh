@@ -237,4 +237,4 @@ createList(){
    done
 } # end createList()
 
-main $@ >> ./logs/stndout.log
+main $@ >> extract_dissimilar_stndout.log
