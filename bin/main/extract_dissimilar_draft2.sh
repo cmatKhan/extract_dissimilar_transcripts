@@ -121,7 +121,7 @@ main(){
       printf "\npath to database is $databaseMinus_path\n"
       makeDissimilarFasta $databaseMinus_path $current_fasta $repo_bin
       # add this .fa to array which stores final .fa to concat to reference_transcriptome
-      final_concat_fa=$(realpath $(find . -name "*.fa"))
+      final_concat_fa=$(realpath $(find . -maxdepth 1 -name "*.fa"))
       echo $final_concat_fa >> ${project_dir}/logs/dissimilar_dissimilar_fa_to_concat.txt
       cd $input_transcriptomes_dir
     done
