@@ -136,6 +136,7 @@ main(){
    done
    cat $ref_transcriptome >> concat_ref_dissimilar.fa
    cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
+   mv ../extract_dissimilar_stndout.log ./logs/
   exit 0
 } # end main()
 
@@ -236,4 +237,4 @@ createList(){
    done
 } # end createList()
 
-main $@ >> ${project_dir}/logs/stndout.log
+main $@ >> ./logs/stndout.log
