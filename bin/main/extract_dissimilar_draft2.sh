@@ -134,8 +134,8 @@ main(){
    do
      cat $final_fa >> dissimilar_transcripts.fa
    done
-   cat $ref_transcriptome >> concat_ref_dissimilar.fa
-   cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
+   cat $reference_transcriptome >> concat_ref_dissimilar.fa
+   cat ./dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
    mv ../extract_dissimilar_stndout.log ./logs/
   exit 0
 } # end main()
@@ -212,20 +212,20 @@ makeDissimilarFasta(){
 #    done
 # } # end createDissimilarConcatMinusFasta()
 
-createFinalConcat(){
-  printf "\ncreate final concat transcriptome\n"
-
-  local fa_to_concat=$1
-  local ref=$2
-
-
-  for fasta in $fa_to_concat;
-   do
-     cat $fasta >> dissimilar_transcripts.fa
-   done
-   cat $2 >> concat_ref_dissimilar.fa
-   cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
-} # end createFinalConcat
+# createFinalConcat(){
+#   printf "\ncreate final concat transcriptome\n"
+#
+#   local fa_to_concat=$1
+#   local ref=$2
+#
+#
+#   for fasta in $fa_to_concat;
+#    do
+#      cat $fasta >> dissimilar_transcripts.fa
+#    done
+#    cat $2 >> concat_ref_dissimilar.fa
+#    cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
+# } # end createFinalConcat
 
 createList(){
   file_to_arr=$1
