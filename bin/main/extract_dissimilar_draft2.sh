@@ -129,7 +129,13 @@ main(){
     transcripts_to_concat=$(createList ${project_dir}/logs/dissimilar_dissimilar_fa_to_concat.txt)
 
   cd $project_dir
-  createFinalConcat $ref_transcriptome $transcripts_to_concat
+
+  for final_fa in $transcripts_to_concat;
+   do
+     cat $final_fa >> dissimilar_transcripts.fa
+   done
+   cat $ref_transcriptome >> concat_ref_dissimilar.fa
+   cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
   exit 0
 } # end main()
 
@@ -211,12 +217,9 @@ createFinalConcat(){
   local fa_to_concat=$1
   local ref=$2
 
-  touch dissimilar_transcripts.fa
-  touch concat_ref_dissimilar.fa
 
   for fasta in $fa_to_concat;
    do
-     printf "is this just going forever? why isn't it stopping?"
      cat $fasta >> dissimilar_transcripts.fa
    done
    cat $2 >> concat_ref_dissimilar.fa
@@ -233,4 +236,4 @@ createList(){
    done
 } # end createList()
 
-main $@
+main $@ >> ${project_dir}/logs/stndout.log
