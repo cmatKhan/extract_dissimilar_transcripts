@@ -31,16 +31,11 @@ main(){
   local project_name=$3
   local repo_bin=$4
 
-  # initialize array to hold final subset of dissimilar transcripts from each input_transcriptome that are both dissimilar to the reference_transcriptome as well as one another
-  local transcripts_to_concat=()
-
   # create project directory at current location, cd, store path
   mkdirCd extract_dissimilar_${project_name}
   local project_dir=$(pwd)
   mkdir logs
   local logs_dir=${project_dir}/logs
-  # create .txt to store list of dissimilar_to_ref_set .fa paths
-  touch ${logs_dir}/dissimilar_to_ref_set.txt
 
   # make database from reference_transcriptome
   mkdirCd reference_database
@@ -74,10 +69,10 @@ main(){
       cd $input_transcriptomes_dir
     done
 
-    # initialize array to hold the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
-    local dissimilar_to_ref_set=$(cat ${project_dir}/logs/dissimilar_to_ref_set.txt)
+    # a list to store the .fasta of subset of transcripts from input_transcriptomes dissimilar from reference_transcriptome
+    dissimilar_to_ref_set=$(createList ${project_dir}/logs/dissimilar_to_ref_set.txt)
 
-    printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set[@]}\n\n\n\n"
+    printf "\n\n\n\nthe set of fastas dissimilar to the reference transcriptome are ${dissimilar_to_ref_set}\n\n\n\n"
     printf "\n"
 
   # loop through each new_transcriptome dir, create concat_transcriptome minus the
@@ -89,16 +84,34 @@ main(){
   for input_transcriptome_dir in $input_transcriptomes_dir/*;
     do
       printf "\nbegin processing $input_transcriptome_dir to extract .fa of transcripts dissimilar to other transcripts dissimilar to reference transcriptome\n"
+
       cd $input_transcriptome_dir
       # make new directory to hold data related to within_dissimilar set comparison
       mkdirCd blast_against_dissimilar
+
       # current input_transcriptome dissimilar_to_reference .fa
-      local fasta=$(find ../blast_against_reference -name "*.fa")
-      local dissimilar_against_reference_fasta=$(realpath $fasta)
+      local current_fasta=$(realpath $(find ../blast_against_reference -name "*.fa"))
+
       # input dissimilar .fa in input_transcriptome_dir and array of all dissimilar .fa, create concat .fa of all dissimilar_input_transcriptomes EXCEPT current input_transcriptome
       mkdirCd concat_minus_fa
-      printf "\ninput to createDissimilar, remove_fasta: $dissimilar_against_reference_fasta\n set:${dissimilar_to_ref_set[@]}\n"
-      createDissimilarConcatMinusFasta $dissimilar_against_reference_fasta $dissimilar_to_ref_set
+
+      printf "\ninput to createDissimilar, remove_fasta: $current_fasta\n set:$dissimilar_to_ref_set\n"
+
+      # create concat transcriptome minus current_fasta and a filename for new .fa
+      local current_fasta_bn=$(basename $1 .fa)
+      local concat_minus=concat_minus_${current_fasta_bn}.fa
+
+      for fa in $dissimilar_to_ref_set;
+       do
+        printf "\ncreateDissimilar with fasta from set: $fa, current_fasta: $current_fasta\n"
+        if [[ $fa != $current_fasta ]]; then
+          printf "\nconcat $fa to $concat_minus\n"
+          cat $fa >> $concat_minus
+        fi
+       done
+     done
+
+
       cd ..
       # make blast database from concatMinus .fa
       printf "\ninput to makeBlastDB $(realpath $(find ./concat_minus_fa -name "*.fa"))\n"
@@ -111,9 +124,13 @@ main(){
       printf "\npath to database is $databaseMinus_path\n"
       makeDissimilarFasta $databaseMinus_path $dissimilar_against_reference_fasta $repo_bin
       # add this .fa to array which stores final .fa to concat to reference_transcriptome
-      transcripts_to_concat+=($(realpath $(find . -name "*.fa")))
+      final_concat_fa=$(realpath $(find . -name "*.fa"))
+      echo $final_concat_fa >> ${project_dir}/logs/dissimilar_dissimilar_fa_to_concat.txt
       cd $input_transcriptomes_dir
     done
+
+    transcripts_to_concat=$(createList ${project_dir}/logs/dissimilar_dissimilar_fa_to_concat.txt)
+
   cd $project_dir
   createFinalConcat $ref_transcriptome $transcripts_to_concat
   exit 0
@@ -178,16 +195,15 @@ makeDissimilarFasta(){
 createDissimilarConcatMinusFasta(){
   local current_fasta=$1
   local current_fasta_bn=$(basename $1 .fa)
-  local dissim_set=$2
+  local dissim_set=$(echo $2)
 
   local concat_minus=concat_minus_${current_fasta_bn}.fa
-  touch $concat_minus
-
-  for fasta in ${dissim_set[@]};
+  for fa in $dissim_set;
    do
-     printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n"
-    if [[ $fasta != $current_fasta  ]]; then
-      cat $fasta >> $concat_minus
+    printf "\ncreateDissimilar with fasta from set: $fasta, current_fasta: $current_fasta\n"
+    if [[ $fa != $current_fasta ]]; then
+      printf "\nconcat $fasta to $concat_minus\n"
+      cat $fa >> $concat_minus
     fi
    done
 } # end createDissimilarConcatMinusFasta()
@@ -209,5 +225,15 @@ createFinalConcat(){
    cat $2 >> concat_ref_dissimilar.fa
    cat dissimiliar_transcripts.fa >> concat_ref_dissimilar.fa
 } # end createFinalConcat
+
+createList(){
+  file_to_arr=$1
+  declare -a arr=()
+  local length=$(wc -l $file_to_arr | cut -f1 -d ' ')
+  for i in $(seq 1 $length);
+   do
+     awk "NR==$i {print}" $file_to_arr
+   done
+} # end createList()
 
 main $@
