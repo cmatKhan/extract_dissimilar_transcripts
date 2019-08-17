@@ -119,7 +119,7 @@ main(){
       local databaseMinus_path=${databaseMinus}/${databaseMinus_name}
       # create .fa of transcripts which dissimilar to the transcripts which are also dissimilar to the reference transcriptome
       printf "\npath to database is $databaseMinus_path\n"
-      makeDissimilarFasta $databaseMinus_path $dissimilar_against_reference_fasta $repo_bin
+      makeDissimilarFasta $databaseMinus_path $current_fasta $repo_bin
       # add this .fa to array which stores final .fa to concat to reference_transcriptome
       final_concat_fa=$(realpath $(find . -name "*.fa"))
       echo $final_concat_fa >> ${project_dir}/logs/dissimilar_dissimilar_fa_to_concat.txt
@@ -217,10 +217,10 @@ createFinalConcat(){
   for fasta in $fa_to_concat;
    do
      printf "is this just going forever? why isn't it stopping?"
-     cat $fasta >> dissimiliar_transcripts.fa
+     cat $fasta >> dissimilar_transcripts.fa
    done
    cat $2 >> concat_ref_dissimilar.fa
-   cat dissimiliar_transcripts.fa >> concat_ref_dissimilar.fa
+   cat dissimilar_transcripts.fa >> concat_ref_dissimilar.fa
 } # end createFinalConcat
 
 createList(){
